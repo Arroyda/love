@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0817">
+  <title>Nossa Constelação — Retrospectiva</title>
+
+  <!-- Fontes: Cormorant Garamond (títulos, com um ar de carta antiga) + Outfit (texto, limpa e legível) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    #entrar {
+      background: #7b2cbf;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 40px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 5px 15px rgba(123, 44, 191, 0.4);
+    }
+
+    #entrar:hover {
+      background: #9d4edd;
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(123, 44, 191, 0.6);
+    }
+
+    #entrar:active {
+      transform: scale(0.98);
+    }
+
+    /* ============================================
+     TOKENS DE COR — mude só aqui pra mudar o tom
+     de roxo do site inteiro
+     ============================================ */
+    :root {
+      --night: #0b0817;
+      /* fundo principal — céu noturno */
+      --dusk: #150f26;
+      /* fundo secundário — seção do carrossel */
+      --amethyst: #5b2e8c;
+      /* roxo escuro — cor de contraste principal
+                               (também aparece como rgba(91,46,140,...) no
+                               gradiente do hero — se mudar aqui, ajuste lá também) */
+      --starlight: #c9a6f5;
+      /* lilás claro — brilho e destaques pontuais */
+      --moonlight: #f2ecfb;
+      /* quase branco — texto principal */
+      --haze: #9c8db8;
+      /* roxo acinzentado — texto secundário */
+      --border: rgba(201, 166, 245, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--night);
+      color: var(--moonlight);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    ::selection {
+      background: var(--amethyst);
+      color: var(--moonlight);
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--night);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--amethyst);
+      border-radius: 10px;
+    }
+
+    a,
+    button {
+      font-family: inherit;
+    }
+
+    /* contorno visível pra quem navega com teclado */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--starlight);
+      outline-offset: 3px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+    }
+
+    /* ============================================
+     CAMPO DE ESTRELAS — fundo fixo atrás de tudo.
+     Os pontinhos (.star) são criados pelo JS lá embaixo.
+     ============================================ */
+    .stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: var(--moonlight);
+      border-radius: 50%;
+      animation: twinkle ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0.1;
+      }
+
+      50% {
+        opacity: 0.85;
+      }
+    }
+
+    /* todo conteúdo real fica acima do céu de estrelas */
+    section,
+    footer,
+    header {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================
+     HERO
+     ============================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(91, 46, 140, 0.35), transparent 70%);
+    }
+
+    .hero-eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      font-size: 0.75rem;
+      color: var(--haze);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-style: italic;
+      background: linear-gradient(120deg, var(--starlight), var(--moonlight) 45%, var(--starlight));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      max-width: 440px;
+      color: var(--haze);
+      font-size: 1.05rem;
+    }
+
+    .scroll-cue {
+      position: absolute;
+      bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--haze);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: float 2.4s ease-in-out infinite;
+    }
+
+    .scroll-cue span:last-child {
+      font-size: 1.1rem;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(8px);
+      }
+    }
+
+    /* ============================================
+     CABEÇALHO DE SEÇÃO (reaproveitado na timeline e no carrossel)
+     ============================================ */
+    .section-heading {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-heading .eyebrow {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 0.75rem;
+      color: var(--haze);
+      margin-bottom: 10px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-style: italic;
+    }
+
+    /* ============================================
+     LINHA DO TEMPO — foto + data + texto
+     Estrutura de cada item: .timeline-spine (estrela + linha
+     que liga ao próximo marco) e .timeline-content (foto/texto).
+     A alternância esquerda/direita é feita só com CSS Grid,
+     então a ordem dos blocos no HTML não importa.
+     ============================================ */
+    .timeline-section {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 140px 24px 100px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr;
+      column-gap: 28px;
+      margin-bottom: 70px;
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .timeline-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-spine {
+      grid-column: 2;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .timeline-star {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--moonlight);
+      box-shadow: 0 0 0 5px var(--night), 0 0 0 6px var(--border);
+      opacity: 0.35;
+      transition: opacity 0.8s ease, box-shadow 0.8s ease;
+      z-index: 2;
+    }
+
+    .timeline-item.visible .timeline-star {
+      opacity: 1;
+      box-shadow: 0 0 0 5px var(--night), 0 0 22px 4px var(--starlight);
+    }
+
+    /* segmento de linha que liga esta estrela à próxima */
+    .timeline-spine::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      bottom: -70px;
+      left: 50%;
+      width: 2px;
+      background: var(--amethyst);
+      opacity: 0.2;
+      transform: translateX(-50%);
+      transition: opacity 0.8s ease, background 0.8s ease;
+    }
+
+    .timeline-item:last-child .timeline-spine::after {
+      display: none;
+    }
+
+    .timeline-item.visible .timeline-spine::after {
+      opacity: 1;
+      background: linear-gradient(to bottom, var(--starlight), var(--amethyst));
+    }
+
+    .timeline-item:nth-child(odd) .timeline-content {
+      grid-column: 1;
+      text-align: right;
+    }
+
+    .timeline-item:nth-child(even) .timeline-content {
+      grid-column: 3;
+      text-align: left;
+    }
+
+    .timeline-photo {
+      aspect-ratio: 4 / 3;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 18px;
+    }
+
+    .timeline-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .timeline-photo:hover img {
+      transform: scale(1.06);
+    }
+
+    .timeline-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--starlight);
+      margin-bottom: 8px;
+    }
+
+    .timeline-content h3 {
+      font-size: 1.5rem;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .timeline-content p {
+      color: var(--haze);
+      font-size: 0.96rem;
+    }
+
+    /* no mobile a espinha vai pra esquerda e tudo vira uma coluna só */
+    @media (max-width: 720px) {
+      .timeline-item {
+        grid-template-columns: 28px 1fr;
+        column-gap: 18px;
+      }
+
+      .timeline-spine {
+        grid-column: 1;
+      }
+
+      .timeline-item:nth-child(odd) .timeline-content,
+      .timeline-item:nth-child(even) .timeline-content {
+        grid-column: 2;
+        text-align: left;
+      }
+    }
+
+    /* ============================================
+     CARROSSEL — "Céu de Momentos": foto + legenda, SEM DATA
+     (o pedido foi por uma seção sem data — por isso as legendas
+     aqui são só sensação, sem marcar quando cada foto foi tirada)
+     ============================================ */
+    .carousel-section {
+      background: var(--dusk);
+      padding: 120px 24px;
+    }
+
+    .carousel {
+      max-width: 640px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .carousel-viewport {
+      overflow: hidden;
+      border-radius: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(.65, 0, .35, 1);
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      position: relative;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(11, 8, 23, 0.92), transparent);
+      padding: 36px 22px 16px;
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(21, 15, 38, 0.85);
+      border: 1px solid var(--border);
+      color: var(--moonlight);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s ease;
+    }
+
+    .carousel-btn:hover {
+      background: var(--amethyst);
+    }
+
+    .carousel-prev {
+      left: -20px;
+    }
+
+    .carousel-next {
+      right: -20px;
+    }
+
+    @media (max-width: 640px) {
+      .carousel-prev {
+        left: 8px;
+      }
+
+      .carousel-next {
+        right: 8px;
+      }
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 24px;
+    }
+
+    .carousel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-dot.active {
+      width: 22px;
+      border-radius: 4px;
+      background: var(--starlight);
+    }
+
+    /* ============================================
+     RODAPÉ
+     ============================================ */
+    footer {
+      text-align: center;
+      padding: 70px 24px;
+      color: var(--haze);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    /* respeita quem prefere menos movimento na tela */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .timeline-item {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+
+
+</head>
+
+<body>
+
+  <!--
+  ═══════════════════════════════════════════════════════════
+  COMO PERSONALIZAR ESTE SITE
+  ═══════════════════════════════════════════════════════════
+  • FOTOS → troque o "src" de cada <img> pela sua foto real
+    (ex: src="fotos/viagem.jpg" se a imagem estiver na mesma pasta
+    do arquivo html). As fotos atuais são só placeholders.
+  • LINHA DO TEMPO → cada marco é um bloco <div class="timeline-item">.
+    Copie o bloco inteiro pra adicionar um marco novo, ou apague
+    pra remover um. Não precisa se preocupar em alternar
+    esquerda/direita manualmente, o CSS faz isso sozinho.
+  • CARROSSEL → cada foto é um <div class="carousel-slide">. Mesma
+    lógica: copiar/apagar. As bolinhas de navegação embaixo são
+    geradas automaticamente pelo JS a partir da quantidade de slides.
+  • CORES → todas centralizadas em :root, no topo do <style>.
+  ═══════════════════════════════════════════════════════════
+-->
+
+  <div class="stars"></div> <!-- preenchido via JS com os pontinhos de estrela -->
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <span class="hero-eyebrow">uma retrospectiva</span>
+    <h1>Nossa Constelação</h1>
+    <p>Cada momento marcou um ponto no céu. Juntos, eles desenham a nossa história.</p>
+    <p>Feito com momentos marcantes e muito carinho!</p>
+    <p>Espero que goste, eu amo você Sabrina!❤️</p>
+    <audio id="musicaFundo" loop>
+      <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="entrar">APERTE AQUI</button>
+
+    <script>
+      const musica = document.getElementById("musicaFundo");
+      const botao = document.getElementById("entrar");
+
+      botao.addEventListener("click", () => {
+        musica.play();
+      });
+    </script>
+    <div class="scroll-cue"><span>role</span><span>↓</span></div>
+  </header>
+
+  <!-- ===== LINHA DO TEMPO (foto + data + texto) ===== -->
+  <section class="timeline-section" id="linha-do-tempo">
+    <div class="section-heading">
+      <span class="eyebrow">nossa linha do tempo</span>
+      <h2>Como a Tudo Começou</h2>
+    </div>
+
+    <div class="timeline">
+
+      <!-- Marco 1 -->
+      <div class="timeline-item">
+        <div class="timeline-spine"><span class="timeline-star"></span></div>
+        <div class="timeline-content">
+          <span class="timeline-date">✦ 13 de Setembro de 2025</span>
+          <h3>O Primeiro "Encontro"</h3>
+          <p>Marcamos de ser ver no Shopping Ciane para você comprar sua roupa para o Submundo, infelizmente não tenho
+            foto do dia.</p>
+        </div>
+      </div>
+
+      <div class="timeline">
+
+        <!-- Marco 1 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto1.jpeg" alt="O primeiro encontro" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 21 de Setembro de 2025</span>
+            <h3>Submundo808</h3>
+            <p>Tivemos nosso primeiro show juntos e tecnicamente o primeiro encontro.</p>
+          </div>
+        </div>
+
+        <!-- Marco 2 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto2.jpeg" alt="Primeira viagem juntos" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 28 Setembro de 2025</span>
+            <h3>Vários encontos no PDS</h3>
+            <p>Alguns dias tiveram um clima bom outros nem tanto, dia tranquilo e muito gostoso.</p>
+          </div>
+        </div>
+
+        <!-- Marco 3 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto3.jpeg" alt="Um ano juntos" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 1 de Novembro 2025</span>
+            <h3>Conhecendo meu Pai e a Cris</h3>
+            <p>Fomos ao BigJeff's perto de casa, onde você estava muito nervosa e timida pois foi conhecer minha
+              familia.</p>
+          </div>
+        </div>
+
+        <!-- Marco 4 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto4.jpeg" alt="Morando juntos" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 2 de Novembro 2025</span>
+            <h3>Em casa, testando as habilidades para a CNH</h3>
+            <p>Você foi em casa e ficamos o dia todo de boa, assistindo, dando risada e conversando, você até tentou
+              dirigir kkkkkk.</p>
+          </div>
+        </div>
+
+        <!-- Marco 5 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto5.jpeg" alt="Hoje" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 16 de Novembro 2025</span>
+            <h3>Fomos no Circo!</h3>
+            <p>Neste dia fomos no Circo onde demos muita risada e que tinha um Churros muito caro, de 30 pila.</p>
+          </div>
+        </div>
+
+        <!-- Marco 5 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto6.jpeg" alt="Hoje" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 12 de Dezembro 2025</span>
+            <h3>Escutei o SIM tão esperado!</h3>
+            <p>Na semana desse dia fiz tudo correndo para que desse certo e querendo escutar o seu SIM o quanto antes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Marco 5 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto7.jpeg" alt="Hoje" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 12 de Fevereiro 2025</span>
+            <h3>Presente inesperado!</h3>
+            <p>Fiz uma surpresa para você de comemoração de 1 mês, um dia em que você chorou pela surpresa simples.</p>
+          </div>
+        </div>
+
+        <!-- Marco 5 -->
+        <div class="timeline-item">
+          <div class="timeline-spine"><span class="timeline-star"></span></div>
+          <div class="timeline-content">
+            <div class="timeline-photo">
+              <img src="foto8.jpeg" alt="Hoje" loading="lazy">
+            </div>
+            <span class="timeline-date">✦ 12 de Agosto 2026</span>
+            <h3>Feliz 8 Meses!</h3>
+            <p>Temos vários momentos juntos e todos eles eu adorei!</p>
+          </div>
+        </div>
+
+
+      </div>
+  </section>
+
+  <!-- ===== CARROSSEL (foto + legenda, SEM DATA) ===== -->
+  <section class="carousel-section" id="momentos">
+    <div class="section-heading">
+      <span class="eyebrow">sem data, só sentimento</span>
+      <h2>Céu de Momentos</h2>
+      <h1>Achou que seria só isso? Ainda tem mais um pouquinho das nossas mais de 300 fotos até o momento!</h1>
+    </div>
+
+    <div class="carousel">
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="carouselTrack">
+
+          <div class="carousel-slide">
+            <img src="carro (1).jpeg" alt="Momento 1" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (2).jpeg" alt="Momento 2" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (3).jpeg" alt="Momento 3" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (4).jpeg" alt="Momento 4" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (5).jpeg" alt="Momento 5" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (6).jpeg" alt="Momento 6" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (7).jpeg" alt="Momento 7" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (8).jpeg" alt="Momento 8" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (9).jpeg" alt="Momento 9" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (10).jpeg" alt="Momento 10" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (11).jpeg" alt="Momento 11" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (12).jpeg" alt="Momento 12" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (13).jpeg" alt="Momento 13" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (14).jpeg" alt="Momento 14" loading="lazy">
+          </div>
+          <div class="carousel-slide">
+            <img src="carro (15).jpeg" alt="Momento 15" loading="lazy">
+          </div>
+
+
+        </div>
+      </div>
+
+      <button class="carousel-btn carousel-prev" onclick="moverCarrossel(-1)" aria-label="Foto anterior">‹</button>
+      <button class="carousel-btn carousel-next" onclick="moverCarrossel(1)" aria-label="Próxima foto">›</button>
+
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </section>
+
+  <footer>· escrito nas estrelas, guardado com carinho ·</footer>
+
+  <script>
+    /* ============================================
+       CAMPO DE ESTRELAS
+       Cria pontinhos espalhados pela tela, cada um piscando
+       em velocidade e atraso levemente diferentes.
+       ============================================ */
+    const starsContainer = document.querySelector('.stars');
+    const NUM_STARS = 70;
+    for (let i = 0; i < NUM_STARS; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      const tamanho = (Math.random() * 2 + 1).toFixed(1); // entre 1px e 3px
+      star.style.width = tamanho + 'px';
+      star.style.height = tamanho + 'px';
+      star.style.animationDelay = (Math.random() * 6).toFixed(1) + 's';
+      star.style.animationDuration = (3 + Math.random() * 4).toFixed(1) + 's';
+      starsContainer.appendChild(star);
+    }
+
+    /* ============================================
+       ANIMAÇÃO DE ENTRADA DA LINHA DO TEMPO
+       Cada marco "acende" (estrela + linha + texto) quando
+       entra na área visível da tela.
+       ============================================ */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.25 });
+
+    document.querySelectorAll('.timeline-item').forEach((item) => observer.observe(item));
+
+    /* ============================================
+       CARROSSEL DE FOTOS
+       ============================================ */
+    const track = document.getElementById('carouselTrack');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dotsContainer = document.getElementById('carouselDots');
+    let indiceAtual = 0;
+
+    // cria uma bolinha de navegação pra cada slide existente
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Ir para a foto ' + (i + 1));
+      dot.addEventListener('click', () => irParaSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = document.querySelectorAll('.carousel-dot');
+
+    function moverCarrossel(direcao) {
+      indiceAtual = (indiceAtual + direcao + slides.length) % slides.length;
+      atualizarCarrossel();
+    }
+
+    function irParaSlide(indice) {
+      indiceAtual = indice;
+      atualizarCarrossel();
+    }
+
+    function atualizarCarrossel() {
+      track.style.transform = `translateX(-${indiceAtual * 100}%)`;
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === indiceAtual));
+    }
+
+    // avança sozinho a cada 5 segundos
+    let autoplay = setInterval(() => moverCarrossel(1), 5000);
+
+    // pausa o autoplay enquanto o mouse estiver sobre o carrossel
+    const carouselEl = document.querySelector('.carousel');
+    carouselEl.addEventListener('mouseenter', () => clearInterval(autoplay));
+    carouselEl.addEventListener('mouseleave', () => {
+      autoplay = setInterval(() => moverCarrossel(1), 5000);
+    });
+  </script>
+
+</body>
+
+</html>
